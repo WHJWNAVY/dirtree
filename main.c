@@ -1,6 +1,10 @@
 #include "log.h"
 #include "dirtree.h"
 
+void DirTreeForeaCallBack(const DirTree *Tree) {
+    printf("%s, %lu, %d\n", Tree->Name, Tree->Attribute.ul_fid, Tree->Attribute.b_isdir);
+}
+
 int main(int argc, char *argv[]) {
     FileAttr attr = {0};
     DirTree *root = DirTree_Create();
@@ -35,7 +39,34 @@ int main(int argc, char *argv[]) {
     attr.ul_size = 400;
     DirTree_SetFileAttr(DirTree_FindExact(root, "test2/test2.txt"), &attr);
 
-    DirTree_Dump(root);
+    LOG_DEBUG("======");
+    DirTreeDump(root);
+
+    LOG_DEBUG("===Foreach===");
+    DirTreeForeach(root, DirTreeForeaCallBack);
+
+
+    LOG_DEBUG("===Dump /test2===");
+    DirTreeDump(DirTree_FindExact(root, "test2"));
+
+    LOG_DEBUG("===FileExists[%d]===", DirTree_FileExists(DirTree_FindExact(root, "test1"), "test3.txt"));
+    LOG_DEBUG("===FileExists[%d]===", DirTree_FileExists(DirTree_FindExact(root, "test2"), "test1.txt"));
+
+    DirTree_Remove(root, DirTree_FindExact(root, "test2/test1"));
+    LOG_DEBUG("===Dump after remove test2/test1===");
+    DirTreeDump(root);
+
+    DirTree_Remove(root, DirTree_FindExact(root, "test"));
+    LOG_DEBUG("===Dump after remove test===");
+    DirTreeDump(root);
+
+    DirTree_Remove(root, DirTree_FindExact(root, "test1"));
+    LOG_DEBUG("===Dump after remove test1===");
+    DirTreeDump(root);
+
+    DirTree_Remove(root, DirTree_FindExact(root, ""));
+    LOG_DEBUG("===Dump after remove /===");
+    DirTreeDump(root);
 
     DirTree_Destroy(root);
     return 0;

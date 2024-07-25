@@ -66,7 +66,7 @@
 #define _MAX_EXT 256
 #endif
 
-void _splitpath(const char *path, char *drive, char *dir, char *fname, char *ext);
+void Splitpath(const char *path, char *drive, char *dir, char *fname, char *ext);
 const char *GetNextDir(const char *Path, char *Buff);
 bool MatchPattern(const char *Source, const char *Pattern);
 bool PathHasDir(const char *Path);

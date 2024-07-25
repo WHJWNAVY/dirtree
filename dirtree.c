@@ -19,8 +19,20 @@
 /*  Copyright (C) 1999 WildTangent, Inc. All Rights Reserved           */
 /*                                                                                      */
 /****************************************************************************************/
-
+#include "log.h"
 #include "dirtree.h"
+
+#define Assert(_x)                      \
+    if (!(_x)) {                        \
+        LOG_ERROR("Assertion Failed!"); \
+        return;                         \
+    }
+
+#define AssertV(_x, _v)                 \
+    if (!(_x)) {                        \
+        LOG_ERROR("Assertion failed of [%s]!", #_x); \
+        return (_v);                    \
+    }
 
 DirTree *DirTree_Create(void) {
     DirTree *Tree = NULL;
@@ -42,7 +54,7 @@ DirTree *DirTree_Create(void) {
 }
 
 void DirTree_Destroy(DirTree *Tree) {
-    assert(Tree);
+    Assert(Tree);
     assert(Tree->Name);
 
     if (Tree->Children)
@@ -59,8 +71,8 @@ DirTree *DirTree_FindExact(const DirTree *Tree, const char *Path) {
     static char Buff[_MAX_PATH] = {0};
     DirTree *Siblings = NULL;
 
-    assert(Tree);
-    assert(Path);
+    AssertV(Tree, NULL);
+    AssertV(Path, NULL);
 
     if (*Path == '/')
         return NULL;
@@ -87,8 +99,8 @@ DirTree *DirTree_FindPartial(const DirTree *Tree, const char *Path, const char *
     static char Buff[_MAX_PATH] = {0};
     DirTree *Siblings = NULL;
 
-    assert(Tree);
-    assert(Path);
+    AssertV(Tree, NULL);
+    AssertV(Path, NULL);
 
     if (*Path == '/')
         return NULL;
@@ -118,11 +130,9 @@ DirTree *DirTree_AddFile(DirTree *Tree, const char *Path, bool IsDirectory) {
     DirTree *NewEntry = NULL;
     const char *LeftOvers = NULL;
 
-    assert(Tree);
-    assert(Path);
-    assert(IsDirectory == true || IsDirectory == false);
-
-    assert(strlen(Path) > 0);
+    AssertV(Tree, NULL);
+    AssertV(Path, NULL);
+    AssertV((strlen(Path) > 0), NULL);
 
     if (PathHasDir(Path)) {
         Tree = DirTree_FindPartial(Tree, Path, &LeftOvers);
@@ -136,8 +146,9 @@ DirTree *DirTree_AddFile(DirTree *Tree, const char *Path, bool IsDirectory) {
     }
 
     NewEntry = malloc(sizeof(*NewEntry));
-    if (!NewEntry)
+    if (!NewEntry) {
         return NULL;
+    }
 
     memset(NewEntry, 0, sizeof(*NewEntry));
     NewEntry->Name = strdup(Path);
@@ -149,6 +160,7 @@ DirTree *DirTree_AddFile(DirTree *Tree, const char *Path, bool IsDirectory) {
 
     NewEntry->Siblings = Tree->Children;
     Tree->Children = NewEntry;
+    NewEntry->Parent = Tree;
 
     if (IsDirectory == true) {
         NewEntry->Attribute.b_isdir = true;
@@ -163,11 +175,11 @@ bool DirTree_Remove(DirTree *Tree, DirTree *SubTree) {
     DirTree *Parent = NULL;
     DirTree *ParanoiaCheck = NULL;
 
-    assert(Tree);
-    assert(SubTree);
+    AssertV(Tree, false);
+    AssertV(SubTree, false);
 
     Parent = SubTree->Parent;
-    assert(Parent);
+    AssertV(Parent, false);
 
     ParanoiaCheck = Parent;
     while (ParanoiaCheck && ParanoiaCheck != Tree)
@@ -176,7 +188,7 @@ bool DirTree_Remove(DirTree *Tree, DirTree *SubTree) {
         return false;
 
     Siblings.Siblings = Parent->Children;
-    assert(Siblings.Siblings);
+    AssertV(Siblings.Siblings, false);
     pSiblings = &Siblings;
     while (pSiblings->Siblings) {
         if (pSiblings->Siblings == SubTree) {
@@ -190,20 +202,20 @@ bool DirTree_Remove(DirTree *Tree, DirTree *SubTree) {
         pSiblings = pSiblings->Siblings;
     }
 
-    assert(!"Shouldn't be a way to get here");
+    AssertV(!"Shouldn't be a way to get here", false);
     return false;
 }
 
 void DirTree_SetFileAttr(DirTree *Tree, FileAttr *Attributes) {
-    assert(Tree);
-    assert(Attributes);
+    Assert(Tree);
+    Assert(Attributes);
 
     memcpy(&(Tree->Attribute), Attributes, sizeof(FileAttr));
 }
 
 void DirTree_GetFileAttr(DirTree *Tree, FileAttr *Attributes) {
-    assert(Tree);
-    assert(Attributes);
+    Assert(Tree);
+    Assert(Attributes);
 
     memcpy(Attributes, &(Tree->Attribute), sizeof(FileAttr));
 }
@@ -211,9 +223,9 @@ void DirTree_GetFileAttr(DirTree *Tree, FileAttr *Attributes) {
 bool DirTree_GetName(DirTree *Tree, char *Buff, int32_t MaxLen) {
     int32_t Length = 0;
 
-    assert(Tree);
-    assert(Buff);
-    assert(MaxLen > 0);
+    AssertV(Tree, false);
+    AssertV(Buff, false);
+    AssertV((MaxLen > 0), false);
 
     Length = strlen(Tree->Name);
     if (Length > MaxLen)
@@ -231,6 +243,7 @@ bool DirTree_FileExists(const DirTree *Tree, const char *Path) {
     return true;
 }
 
+#if 0
 DirTree_Finder *DirTree_CreateFinder(DirTree *Tree, const char *Path) {
     DirTree_Finder *Finder = NULL;
     DirTree *SubTree = NULL;
@@ -238,14 +251,15 @@ DirTree_Finder *DirTree_CreateFinder(DirTree *Tree, const char *Path) {
     char Name[_MAX_FNAME] = {0};
     char Ext[_MAX_EXT] = {0};
 
-    assert(Tree);
-    assert(Path);
+    AssertV(Tree,NULL);
+    AssertV(Path,NULL);
 
-    _splitpath(Path, NULL, Directory, Name, Ext);
-
+    Splitpath(Path, NULL, Directory, Name, Ext);
+    LOG_DEBUG("===dir[%s], name[%s], ext[%s]===", Directory, Name, Ext);
     SubTree = DirTree_FindExact(Tree, Directory);
-    if (!SubTree)
+    if (!SubTree) {
         return NULL;
+    }
 
     Finder = malloc(sizeof(*Finder));
     if (!Finder)
@@ -258,10 +272,11 @@ DirTree_Finder *DirTree_CreateFinder(DirTree *Tree, const char *Path) {
     }
 
     // The RTL leaves the '.' on there.  That won't do.
-    if (*Ext == '.')
+    if (*Ext == '.') {
         Finder->MatchExt = strdup(&Ext[1]);
-    else
+    } else {
         Finder->MatchExt = strdup(&Ext[0]);
+    }
 
     if (!Finder->MatchExt) {
         free(Finder->MatchName);
@@ -275,9 +290,9 @@ DirTree_Finder *DirTree_CreateFinder(DirTree *Tree, const char *Path) {
 }
 
 void DirTree_DestroyFinder(DirTree_Finder *Finder) {
-    assert(Finder);
-    assert(Finder->MatchName);
-    assert(Finder->MatchExt);
+    Assert(Finder);
+    Assert(Finder->MatchName);
+    Assert(Finder->MatchExt);
 
     free(Finder->MatchName);
     free(Finder->MatchExt);
@@ -289,55 +304,77 @@ DirTree *DirTree_FinderGetNextFile(DirTree_Finder *Finder) {
     char Name[_MAX_FNAME] = {0};
     char Ext[_MAX_EXT] = {0};
 
-    assert(Finder);
+    AssertV(Finder,NULL);
 
     Res = Finder->Current;
 
-    if (!Res)
+    if (!Res) {
         return Res;
+    }
 
     do {
-        _splitpath(Res->Name, NULL, NULL, Name, Ext);
+        Splitpath(Res->Name, NULL, NULL, Name, Ext);
+        LOG_DEBUG("===name[%s], ext[%s]===", Name, Ext);
         if (MatchPattern(Name, Finder->MatchName) == true && MatchPattern(Ext, Finder->MatchExt) == true) {
             break;
         }
-
         Res = Res->Siblings;
-
     } while (Res);
 
-    if (Res)
+    if (Res) {
         Finder->Current = Res->Siblings;
+    }
 
     return Res;
 }
+#endif
 
-#ifdef DEBUG
+typedef void (*DirTreeForeachCb)(const DirTree *Tree);
 
-static inline void indent(int i) {
-    while (i--)
-        printf(" ");
-}
+void DirTreeForeach(const DirTree *Tree, DirTreeForeachCb CallBack) {
+    DirTree *Temp = NULL;
+    Assert(Tree);
+    Assert(CallBack);
 
-static void DirTree_Dump1(const DirTree *Tree, int i) {
-    DirTree *Temp;
+    CallBack(Tree);
 
-    indent(i);
-    if (Tree->Attribute.b_isdir)
-        printf("/%s\n", Tree->Name);
-    else
-        printf("%-*s  %-8u  %-8u\n", 40 - i, Tree->Name, Tree->Attribute.ul_fid, Tree->Attribute.ul_size);
     Temp = Tree->Children;
     while (Temp) {
-        DirTree_Dump1(Temp, i + 2);
+        DirTreeForeach(Temp, CallBack);
         Temp = Temp->Siblings;
     }
 }
 
-void DirTree_Dump(const DirTree *Tree) {
+#ifdef DEBUG
+static inline void indent(int i) {
+    while (i--) {
+        printf(" ");
+    }
+}
+
+static void DirTreeDump1(const DirTree *Tree, int i) {
+    DirTree *Temp = NULL;
+    Assert(Tree);
+
+    indent(i);
+    if (Tree->Attribute.b_isdir) {
+        printf("/%s\n", Tree->Name);
+    } else {
+        printf("%-*s  %-8u  %-8u\n", 40 - i, Tree->Name, Tree->Attribute.ul_fid, Tree->Attribute.ul_size);
+    }
+    Temp = Tree->Children;
+    while (Temp) {
+        DirTreeDump1(Temp, i + 2);
+        Temp = Temp->Siblings;
+    }
+}
+
+void DirTreeDump(const DirTree *Tree) {
+    Assert(Tree);
+
     printf("%-*s  %-8s  %-8s\n", 40, "Name", "Fid", "Size");
     printf("------------------------------------------------------------\n");
-    DirTree_Dump1(Tree, 0);
+    DirTreeDump1(Tree, 0);
 }
 
 #endif

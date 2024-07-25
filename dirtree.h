@@ -36,7 +36,6 @@ typedef struct {
 
 typedef struct _DirTree {
     char *Name;
-    long Size;
     FileAttr Attribute;
     struct _DirTree *Parent;
     struct _DirTree *Children;
@@ -68,14 +67,17 @@ bool DirTree_GetName(DirTree *Tree, char *Buff, int MaxLen);
 
 bool DirTree_FileExists(const DirTree *Tree, const char *Path);
 
+typedef void (*DirTreeForeachCb)(const DirTree *Tree);
+void DirTreeForeach(const DirTree *Tree, DirTreeForeachCb CallBack);
+
+#if 0
 DirTree_Finder *DirTree_CreateFinder(DirTree *Tree, const char *Path);
-
 void DirTree_DestroyFinder(DirTree_Finder *Finder);
-
 DirTree *DirTree_FinderGetNextFile(DirTree_Finder *Finder);
+#endif
 
 #ifdef DEBUG
-void DirTree_Dump(const DirTree *Tree);
+void DirTreeDump(const DirTree *Tree);
 #endif
 
 #endif
