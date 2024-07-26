@@ -42,11 +42,13 @@ typedef struct _DirTree {
     struct _DirTree *Siblings;
 } DirTree;
 
+#if 0
 typedef struct {
     char *MatchName;
     char *MatchExt;
     DirTree *Current;
 } DirTree_Finder;
+#endif
 
 DirTree *DirTree_Create(void);
 
@@ -55,6 +57,7 @@ void DirTree_Destroy(DirTree *Tree);
 DirTree *DirTree_FindExact(const DirTree *Tree, const char *Path);
 DirTree *DirTree_FindPartial(const DirTree *Tree, const char *Path, const char **LeftOvers);
 
+DirTree *DirTree_Add(DirTree *Tree, const char *Path, FileAttr *Attributes);
 DirTree *DirTree_AddFile(DirTree *Tree, const char *Path, bool IsDirectory);
 
 bool DirTree_Remove(DirTree *Tree, DirTree *SubTree);
@@ -67,8 +70,10 @@ bool DirTree_GetName(DirTree *Tree, char *Buff, int MaxLen);
 
 bool DirTree_FileExists(const DirTree *Tree, const char *Path);
 
-typedef void (*DirTreeForeachCb)(const DirTree *Tree);
-void DirTreeForeach(const DirTree *Tree, DirTreeForeachCb CallBack);
+typedef bool (*DirTreeForeachCb)(const DirTree *Tree, void *Data);
+void DirTree_ReadDir(const DirTree *Tree, DirTreeForeachCb CallBack, void *Data);
+
+void DirTree_Foreach(const DirTree *Tree, DirTreeForeachCb CallBack, void *Data);
 
 #if 0
 DirTree_Finder *DirTree_CreateFinder(DirTree *Tree, const char *Path);
