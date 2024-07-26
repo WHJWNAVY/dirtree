@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     DirTree *t2_test1 = DirTree_FindExact(root, "t2-test1");
 
     LOG_DEBUG("======");
-    DirTreeDump(root);
+    DirTree_Dump(root);
 
     LOG_DEBUG("===ReadDir /===");
     DirTree_ReadDir(root, DirTreeForeaCallBack, NULL);
@@ -86,22 +86,22 @@ int main(int argc, char *argv[]) {
     DirTree_Foreach(test2, DirTreeForeaCallBack, NULL);
 
     LOG_DEBUG("===Dump /test2===");
-    DirTreeDump(test2);
+    DirTree_Dump(test2);
 
     LOG_DEBUG("===FileExists[%d]===", DirTree_FileExists(test1, "t1-test3.txt"));
     LOG_DEBUG("===FileExists[%d]===", DirTree_FileExists(test2, "t2-test1.txt"));
 
     DirTree_Remove(root, t2_test1);
     LOG_DEBUG("===Dump after remove test2/t2-test1===");
-    DirTreeDump(root);
+    DirTree_Dump(root);
 
     DirTree_Remove(root, DirTree_FindExact(root, "test"));
     LOG_DEBUG("===Dump after remove test===");
-    DirTreeDump(root);
+    DirTree_Dump(root);
 
     DirTree_Remove(root, test1);
     LOG_DEBUG("===Dump after remove test1===");
-    DirTreeDump(root);
+    DirTree_Dump(root);
 
     DirTree_Destroy(root);
     return 0;
