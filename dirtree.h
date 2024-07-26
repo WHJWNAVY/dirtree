@@ -1,5 +1,5 @@
-#ifndef DIRTREE_H
-#define DIRTREE_H
+#ifndef _DIRTREE_H_
+#define _DIRTREE_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,26 +25,6 @@
 
 #define DEBUG 1
 
-#ifndef _MAX_PATH
-#define _MAX_PATH 260
-#endif
-
-#ifndef _MAX_DRIVE
-#define _MAX_DRIVE 3
-#endif
-
-#ifndef _MAX_DIR
-#define _MAX_DIR 256
-#endif
-
-#ifndef _MAX_FNAME
-#define _MAX_FNAME 256
-#endif
-
-#ifndef _MAX_EXT
-#define _MAX_EXT 256
-#endif
-
 typedef struct {
     uint64_t ul_fid;
     uint64_t ul_size;
@@ -53,57 +33,57 @@ typedef struct {
     uint64_t ul_ctime;
     uint16_t us_mode;
     bool b_isdir;
-} FileAttr;
+} fileattr;
 
-typedef struct _DirTree {
-    char *Name;
-    FileAttr Attribute;
-    struct _DirTree *Parent;
-    struct _DirTree *Children;
-    struct _DirTree *Siblings;
-} DirTree;
+typedef struct _dirtree {
+    char *name;
+    fileattr attribute;
+    struct _dirtree *parent;
+    struct _dirtree *children;
+    struct _dirtree *siblings;
+} dirtree;
 
 #if 0
 typedef struct {
-    char *MatchName;
-    char *MatchExt;
-    DirTree *Current;
-} DirTree_Finder;
+    char *matchname;
+    char *matchext;
+    dirtree *current;
+} dirtree_finder;
 #endif
 
-DirTree *DirTree_Create(void);
+dirtree *dirtree_create(void);
 
-void DirTree_Destroy(DirTree *Tree);
+void dirtree_destroy(dirtree *tree);
 
-DirTree *DirTree_FindExact(const DirTree *Tree, const char *Path);
-DirTree *DirTree_FindPartial(const DirTree *Tree, const char *Path, const char **LeftOvers);
+dirtree *dirtree_find(const dirtree *tree, const char *path);
+dirtree *dirtree_findpartial(const dirtree *tree, const char *path, const char **leftovers);
 
-DirTree *DirTree_Add(DirTree *Tree, const char *Path, FileAttr *Attributes);
-DirTree *DirTree_AddFile(DirTree *Tree, const char *Path, bool IsDirectory);
+dirtree *dirtree_add(dirtree *tree, const char *path, fileattr *attributes);
+dirtree *dirtree_addfile(dirtree *tree, const char *path, bool isdirectory);
 
-bool DirTree_Remove(DirTree *Tree, DirTree *SubTree);
+bool dirtree_remove(dirtree *tree, dirtree *subtree);
 
-void DirTree_SetFileAttr(DirTree *Tree, FileAttr *Attributes);
+void dirtree_setattr(dirtree *tree, fileattr *attributes);
 
-void DirTree_GetFileAttr(DirTree *Tree, FileAttr *Attributes);
+void dirtree_getattr(dirtree *tree, fileattr *attributes);
 
-bool DirTree_GetName(DirTree *Tree, char *Buff, int MaxLen);
+bool dirtree_getname(dirtree *tree, char *buff, size_t maxlen);
 
-bool DirTree_FileExists(const DirTree *Tree, const char *Path);
+bool dirtree_fileexists(const dirtree *tree, const char *path);
 
-typedef bool (*DirTreeForeachCb)(const DirTree *Tree, void *Data);
-void DirTree_ReadDir(const DirTree *Tree, DirTreeForeachCb CallBack, void *Data);
+typedef bool (*dirtreeforeachcb)(const dirtree *tree, void *data);
+void dirtree_readdir(const dirtree *tree, dirtreeforeachcb callback, void *data);
 
-void DirTree_Foreach(const DirTree *Tree, DirTreeForeachCb CallBack, void *Data);
+void dirtree_foreach(const dirtree *tree, dirtreeforeachcb callback, void *data);
 
 #if 0
-DirTree_Finder *DirTree_CreateFinder(DirTree *Tree, const char *Path);
-void DirTree_DestroyFinder(DirTree_Finder *Finder);
-DirTree *DirTree_FinderGetNextFile(DirTree_Finder *Finder);
+dirtree_finder *dirtree_createfinder(dirtree *tree, const char *path);
+void dirtree_destroyfinder(dirtree_finder *finder);
+dirtree *dirtree_findergetnextfile(dirtree_finder *finder);
 #endif
 
 #ifdef DEBUG
-void DirTree_Dump(const DirTree *Tree);
+void dirtree_dump(const dirtree *tree);
 #endif
 
 #endif
