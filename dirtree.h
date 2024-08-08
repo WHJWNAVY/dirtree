@@ -122,6 +122,7 @@ void dirtree_setattr(dirtree *tree, fileattr *attributes);
 
 void dirtree_getattr(dirtree *tree, fileattr *attributes);
 
+bool dirtree_rename(dirtree *tree, const char *path);
 bool dirtree_getname(dirtree *tree, char *buff, size_t maxlen);
 bool dirtree_getpath(dirtree *tree, char *buff, size_t maxlen);
 

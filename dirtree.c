@@ -398,6 +398,30 @@ void dirtree_getattr(dirtree *tree, fileattr *attributes) {
     memcpy(attributes, &(tree->attribute), sizeof(fileattr));
 }
 
+bool dirtree_rename(dirtree *tree, const char *path) {
+    char *name = NULL;
+    ASSERTV(tree, false);
+    ASSERTV(path, false);
+
+    name = strrchr(path, '/');
+    if (name) {
+        name += 1;
+    } else {
+        name = path;
+    }
+
+    if ((name == NULL) || (*name == '\0')) {
+        return false;
+    }
+
+    if (tree->name) {
+        free(tree->name);
+    }
+    tree->name = strdup(name);
+
+    return true;
+}
+
 bool dirtree_getname(dirtree *tree, char *buff, size_t maxlen) {
     size_t length = 0;
 
